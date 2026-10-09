@@ -4,260 +4,221 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>בוחן מקיף: ניווט, טופוגרפיה ותצ"א</title>
-    <!-- PeerJS Realtime Connection -->
+    <!-- PeerJS for Realtime Peer-to-Peer Communication -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.4.7/peerjs.min.js"></script>
 
     <style>
         :root {
-            --bg-dark: #0a0f0d;
-            --panel-bg: rgba(18, 28, 22, 0.95);
-            --border-color: #2a4735;
+            --bg-gradient: linear-gradient(135deg, #050b08 0%, #0d1a14 50%, #050806 100%);
+            --panel-bg: rgba(15, 25, 20, 0.75);
+            --panel-border: rgba(0, 255, 102, 0.2);
             --accent-green: #00ff66;
-            --accent-gold: #ffd700;
-            --text-main: #e0f0e5;
-            --text-muted: #8ba895;
+            --accent-green-glow: rgba(0, 255, 102, 0.4);
+            --accent-gold: #ffcc00;
+            --text-main: #f0f8f4;
+            --text-muted: #9ab3a5;
             
-            --btn-red: #d32f2f;
-            --btn-blue: #1976d2;
-            --btn-yellow: #f57c00;
-            --btn-green: #388e3c;
+            --btn-a: linear-gradient(135deg, #e53935, #b71c1c);
+            --btn-b: linear-gradient(135deg, #1e88e5, #0d47a1);
+            --btn-c: linear-gradient(135deg, #fb8c00, #e65100);
+            --btn-d: linear-gradient(135deg, #43a047, #1b5e20);
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
 
         body {
-            background-color: var(--bg-dark);
+            background: var(--bg-gradient);
             color: var(--text-main);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 0.5rem;
+            padding: 1rem;
+            overflow-x: hidden;
         }
 
+        /* Modern Glassmorphism Cards */
         .screen {
             display: none;
             width: 100%;
-            max-width: 1100px;
+            max-width: 1050px;
             background: var(--panel-bg);
-            border: 2px solid var(--border-color);
-            border-radius: 12px;
-            padding: 1.2rem;
-            text-align: center;
-            box-shadow: 0 0 25px rgba(0, 255, 102, 0.15);
+            border: 1px solid var(--panel-border);
+            border-radius: 20px;
+            padding: 2rem;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 30px rgba(0, 255, 102, 0.05);
+            animation: fadeIn 0.3s ease-out;
         }
 
         .screen.active { display: block; }
 
-        h1 { font-size: 1.6rem; color: #fff; margin-bottom: 0.8rem; }
-        h2 { font-size: 1.3rem; color: #fff; margin-bottom: 0.8rem; }
-        p { color: var(--text-muted); font-size: 1rem; margin-bottom: 1rem; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
-        .btn {
-            background: linear-gradient(135deg, #1b3826, #0e2115);
-            border: 1px solid var(--accent-green);
-            color: var(--accent-green);
-            padding: 0.8rem 1.5rem;
-            font-size: 1.1rem;
-            font-weight: bold;
-            border-radius: 8px;
+        h1 { font-size: 1.8rem; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 0.5rem; text-shadow: 0 0 20px var(--accent-green-glow); }
+        h2 { font-size: 1.4rem; font-weight: 700; margin-bottom: 1rem; }
+        p { color: var(--text-muted); font-size: 1.05rem; margin-bottom: 1.5rem; }
+
+        /* Buttons & Inputs */
+        .btn-action {
+            background: linear-gradient(135deg, #00ff66, #00b347);
+            border: none;
+            color: #021a0d;
+            padding: 1rem 2rem;
+            font-size: 1.2rem;
+            font-weight: 800;
+            border-radius: 12px;
             cursor: pointer;
-            margin: 0.4rem;
-            transition: all 0.2s;
+            box-shadow: 0 4px 20px rgba(0, 255, 102, 0.3);
+            transition: all 0.2s ease;
+            width: 100%;
+            max-width: 300px;
         }
 
-        .btn:hover { background: var(--accent-green); color: #000; box-shadow: 0 0 15px var(--accent-green); }
+        .btn-action:active { transform: scale(0.97); }
 
-        /* Host Layout Split (Question + Side Leaderboard) */
-        .host-main-layout {
+        .input-field {
+            width: 100%;
+            max-width: 400px;
+            padding: 1.1rem;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 12px;
+            border: 1px solid var(--panel-border);
+            background: rgba(0, 0, 0, 0.5);
+            color: #fff;
+            margin-bottom: 1.2rem;
+            text-align: center;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .input-field:focus { border-color: var(--accent-green); box-shadow: 0 0 15px var(--accent-green-glow); }
+
+        /* Mode Selection Cards */
+        .mode-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .mode-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 2rem 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .mode-card:hover {
+            border-color: var(--accent-green);
+            transform: translateY(-5px);
+            background: rgba(0, 255, 102, 0.05);
+            box-shadow: 0 10px 30px rgba(0, 255, 102, 0.15);
+        }
+
+        /* Layout Split for Host (Side Leaderboard + Main View) */
+        .host-split {
             display: grid;
             grid-template-columns: 280px 1fr;
-            gap: 1.2rem;
-            align-items: start;
-        }
-
-        @media (max-width: 800px) {
-            .host-main-layout { grid-template-columns: 1fr; }
-        }
-
-        .side-leaderboard {
-            background: rgba(0,0,0,0.5);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 1rem;
+            gap: 1.5rem;
             text-align: right;
+        }
+
+        @media (max-width: 850px) {
+            .host-split { grid-template-columns: 1fr; }
+        }
+
+        .side-lb {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--panel-border);
+            border-radius: 14px;
+            padding: 1.2rem;
         }
 
         .side-lb-item {
             display: flex;
             justify-content: space-between;
-            padding: 0.5rem;
-            margin-bottom: 0.4rem;
-            background: rgba(255,255,255,0.05);
-            border-radius: 4px;
-            font-size: 0.95rem;
-            font-weight: bold;
-        }
-
-        .side-lb-item:nth-child(1) { color: var(--accent-gold); border-right: 3px solid var(--accent-gold); }
-
-        /* Mobile Responsive Area */
-        .mobile-card {
-            background: rgba(0,0,0,0.4);
-            border: 1px solid var(--border-color);
-            border-radius: 10px;
-            padding: 1rem;
-            margin-bottom: 1rem;
-            text-align: right;
-        }
-
-        .mobile-opt-btn {
-            width: 100%;
-            border: none;
-            border-radius: 8px;
-            color: #fff;
-            padding: 1rem;
-            font-size: 1rem;
-            font-weight: bold;
-            margin-bottom: 0.6rem;
-            text-align: right;
-            cursor: pointer;
-            display: flex;
             align-items: center;
-            justify-content: flex-start;
-            gap: 8px;
+            padding: 0.7rem 0.9rem;
+            margin-bottom: 0.5rem;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.95rem;
         }
 
-        .opt-a { background: var(--btn-red); }
-        .opt-b { background: var(--btn-blue); }
-        .opt-c { background: var(--btn-yellow); }
-        .opt-d { background: var(--btn-green); }
+        .side-lb-item:nth-child(1) { border-right: 4px solid var(--accent-gold); color: var(--accent-gold); }
 
-        .timer-container {
-            width: 100%;
-            height: 10px;
-            background: #1a1a1a;
-            border-radius: 5px;
-            overflow: hidden;
-            margin: 0.8rem 0;
-        }
-
-        .timer-bar {
-            height: 100%;
-            width: 100%;
-            background: var(--accent-green);
-            transition: width 1s linear;
-        }
-
+        /* Host Grid Options */
         .host-options-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 0.8rem;
-            margin: 1rem 0;
+            gap: 1rem;
+            margin: 1.2rem 0;
         }
 
-        .host-option {
-            padding: 0.8rem;
-            border-radius: 6px;
-            font-weight: bold;
-            font-size: 1rem;
-            text-align: right;
+        .host-opt {
+            padding: 1.1rem;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 700;
             color: #fff;
             display: flex;
             justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
 
-        .correct-answer { border: 2px solid #fff; box-shadow: 0 0 10px #fff; }
+        .opt-a { background: var(--btn-a); }
+        .opt-b { background: var(--btn-b); }
+        .opt-c { background: var(--btn-c); }
+        .opt-d { background: var(--btn-d); }
 
-        .player-chip {
-            background: rgba(0, 255, 102, 0.2);
-            border: 1px solid var(--accent-green);
-            padding: 4px 10px;
-            border-radius: 12px;
-            display: inline-block;
-            margin: 3px;
-            font-size: 0.85rem;
-            color: #fff;
-        }
+        .correct-highlight { border: 3px solid #fff; box-shadow: 0 0 25px #fff; transform: scale(1.02); }
 
-        .input-field {
+        /* Timer Bar */
+        .timer-track {
             width: 100%;
-            padding: 0.9rem;
-            font-size: 1.1rem;
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-            background: #000;
-            color: #fff;
-            margin-bottom: 0.8rem;
-            text-align: center;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            overflow: hidden;
+            margin: 1rem 0;
         }
-    </style>
-</head>
-<body>
 
-    <!-- Top Bar Controls -->
-    <div style="position: absolute; top: 10px; left: 10px; z-index: 10;">
-        <button id="sound-toggle" class="btn" style="padding: 4px 10px; font-size: 0.85rem;">🔊 צלילים: פעילים</button>
-    </div>
+        .timer-fill {
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(90deg, var(--accent-green), var(--accent-gold), #ff3333);
+            transition: width 1s linear;
+        }
 
-    <!-- Screen 1: Role Selection -->
-    <div id="screen-select" class="screen active">
-        <h1>בוחן מקיף: ניווט, טופוגרפיה ותצ"א</h1>
-        <p>בחר את התפקיד להתחלת המשחק</p>
-        <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
-            <div style="background: rgba(0,0,0,0.4); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; width: 260px; cursor: pointer;" onclick="initHost()">
-                <h2>📺 מציג (Host)</h2>
-                <p>עבור המסך הראשי / טלוויזיה בכיתה</p>
-            </div>
-            <div style="background: rgba(0,0,0,0.4); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; width: 260px; cursor: pointer;" onclick="showScreen('screen-join')">
-                <h2>📱 צוער (Player)</h2>
-                <p>עבור הסמארטפון האישי</p>
-            </div>
-        </div>
-    </div>
+        /* Mobile Player Layout */
+        .mobile-opt-btn {
+            width: 100%;
+            border: none;
+            border-radius: 14px;
+            color: #fff;
+            padding: 1.2rem 1.5rem;
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin-bottom: 0.9rem;
+            text-align: right;
+            cursor: pointer;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.4);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: transform 0.1s;
+        }
 
-    <!-- Screen 2: Join Screen -->
-    <div id="screen-join" class="screen">
-        <h2>הצטרפות למשחק</h2>
-        <input type="text" id="game-pin-input" class="input-field" placeholder="הזן קוד משחק (PIN)">
-        <input type="text" id="player-name-input" class="input-field" placeholder="שם הצוער / צוות">
-        <button class="btn" onclick="joinGame()">התחבר למשחק</button>
-    </div>
+        .mobile-opt-btn:active { transform: scale(0.96); }
 
-    <!-- Screen 3: Mobile Game UI -->
-    <div id="screen-mobile-game" class="screen">
-        <h3 id="mobile-status">ממתין לתחילת השאלה...</h3>
-        <div id="mobile-question-area" style="display: none;">
-            <div class="mobile-card">
-                <h4 id="mobile-q-num" style="color: var(--accent-gold); margin-bottom: 0.4rem;"></h4>
-                <p id="mobile-q-text" style="color: #fff; font-weight: bold; margin: 0; font-size: 1.1rem;"></p>
-            </div>
-            <button class="mobile-opt-btn opt-a" onclick="sendAnswer('א')"><span>▲</span> <span id="m-opt-a"></span></button>
-            <button class="mobile-opt-btn opt-b" onclick="sendAnswer('ב')"><span>◆</span> <span id="m-opt-b"></span></button>
-            <button class="mobile-opt-btn opt-c" onclick="sendAnswer('ג')"><span>●</span> <span id="m-opt-c"></span></button>
-            <button class="mobile-opt-btn opt-d" onclick="sendAnswer('ד')"><span>■</span> <span id="m-opt-d"></span></button>
-        </div>
-        <div id="mobile-feedback" style="display: none; margin-top: 1.5rem;">
-            <h1 id="feedback-text"></h1>
-            <p id="feedback-score" style="font-size: 1.2rem; margin-top: 0.8rem;"></p>
-        </div>
-    </div>
-
-    <!-- Screen 4: Host Lobby -->
-    <div id="screen-host-lobby" class="screen">
-        <h2>לובי מציג</h2>
-        <h3>קוד משחק (PIN): <span id="host-pin-display" style="color: var(--accent-green); font-size: 2.2rem;">------</span></h3>
-        <p>הצוערים נכנסים לקישור ומזינים את הקוד</p>
-        <h3>צוערים שהתחברו (<span id="player-count">0</span>):</h3>
-        <div id="player-list" style="min-height: 60px; margin: 1rem 0;"></div>
-        <button class="btn" onclick="startQuiz()" style="font-size: 1.2rem;">התחל משחק 🚀</button>
-    </div>
-
-    <!-- Screen 5: Host Question View (With Side Leaderboard) -->
-    <div id="screen-host-question" class="screen">
-        <div class="host-main-layout">
-            
-            <!-- Permanent Side Leaderboard -->
-            <div class="side-leaderboard">
-                <h3 style="color: var(--accent-
+        .badge-chip {
+            background: rgba(0, 255, 102, 0.15);
+            border: 1px solid var(--accent-green);
