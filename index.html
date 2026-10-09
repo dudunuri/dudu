@@ -5,12 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>בוחן מקיף: ניווט, טופוגרפיה ותצ"א</title>
     <!-- PeerJS for Realtime Communication -->
-    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.4.7/peerjs.min.js"></script>
 
     <style>
         :root {
-            --bg-dark: #0d1410;
-            --panel-bg: #14221a;
+            --bg-dark: #0a0f0d;
+            --panel-bg: rgba(18, 28, 22, 0.95);
             --border-color: #2a4735;
             --accent-green: #00ff66;
             --accent-gold: #ffd700;
@@ -23,7 +23,7 @@
             --btn-green: #388e3c;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
 
         body {
             background-color: var(--bg-dark);
@@ -43,72 +43,84 @@
             background: var(--panel-bg);
             border: 2px solid var(--border-color);
             border-radius: 12px;
-            padding: 1.5rem;
+            padding: 2rem;
             text-align: center;
-            box-shadow: 0 0 20px rgba(0,0,0,0.8);
+            box-shadow: 0 0 25px rgba(0, 255, 102, 0.15);
         }
 
         .screen.active { display: block; }
 
         h1, h2, h3 { color: #fff; margin-bottom: 1rem; }
-        p { color: var(--text-muted); margin-bottom: 1rem; }
+        p { color: var(--text-muted); margin-bottom: 1.5rem; font-size: 1.1rem; }
 
         .btn {
-            background: #1b3826;
+            background: linear-gradient(135deg, #1b3826, #0e2115);
             border: 1px solid var(--accent-green);
             color: var(--accent-green);
-            padding: 0.8rem 1.5rem;
-            font-size: 1.1rem;
+            padding: 1rem 2rem;
+            font-size: 1.2rem;
             font-weight: bold;
-            border-radius: 6px;
+            border-radius: 8px;
             cursor: pointer;
             margin: 0.5rem;
+            transition: all 0.2s;
         }
 
-        .btn:hover { background: var(--accent-green); color: #000; }
+        .btn:hover { background: var(--accent-green); color: #000; box-shadow: 0 0 15px var(--accent-green); }
 
         .mode-container {
             display: flex;
-            gap: 1rem;
+            gap: 1.5rem;
             justify-content: center;
             flex-wrap: wrap;
-            margin-top: 1rem;
+            margin-top: 1.5rem;
         }
 
         .mode-card {
-            background: rgba(0,0,0,0.3);
+            background: rgba(0,0,0,0.4);
             border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 1.5rem;
-            width: 250px;
+            border-radius: 10px;
+            padding: 2rem;
+            width: 280px;
             cursor: pointer;
+            transition: transform 0.2s;
         }
 
-        .mode-card:hover { border-color: var(--accent-green); }
+        .mode-card:hover { border-color: var(--accent-green); transform: scale(1.03); }
+
+        .timer-container {
+            width: 100%;
+            height: 12px;
+            background: #1a1a1a;
+            border-radius: 6px;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
 
         .timer-bar {
-            height: 10px;
+            height: 100%;
             width: 100%;
             background: var(--accent-green);
-            margin: 1rem 0;
             transition: width 1s linear;
         }
 
         .host-options-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 0.8rem;
-            margin: 1rem 0;
+            gap: 1rem;
+            margin: 1.5rem 0;
         }
 
         .host-option {
-            padding: 1rem;
-            border-radius: 6px;
+            padding: 1.2rem;
+            border-radius: 8px;
             font-weight: bold;
+            font-size: 1.1rem;
             text-align: right;
             color: #fff;
             display: flex;
             justify-content: space-between;
+            align-items: center;
         }
 
         .opt-a { background: var(--btn-red); }
@@ -116,23 +128,24 @@
         .opt-c { background: var(--btn-yellow); }
         .opt-d { background: var(--btn-green); }
 
-        .correct-answer { border: 3px solid #fff; box-shadow: 0 0 10px #fff; }
+        .correct-answer { border: 3px solid #fff; box-shadow: 0 0 15px #fff; }
 
         .player-chip {
             background: rgba(0, 255, 102, 0.2);
             border: 1px solid var(--accent-green);
-            padding: 5px 12px;
-            border-radius: 15px;
+            padding: 6px 14px;
+            border-radius: 20px;
             display: inline-block;
             margin: 4px;
             font-weight: bold;
+            color: #fff;
         }
 
         .input-field {
             width: 100%;
-            padding: 0.8rem;
-            font-size: 1.1rem;
-            border-radius: 6px;
+            padding: 1rem;
+            font-size: 1.2rem;
+            border-radius: 8px;
             border: 1px solid var(--border-color);
             background: #000;
             color: #fff;
@@ -145,7 +158,7 @@
             border: none;
             border-radius: 8px;
             color: #fff;
-            padding: 1rem;
+            padding: 1.2rem;
             font-size: 1.1rem;
             font-weight: bold;
             margin-bottom: 0.8rem;
@@ -163,11 +176,11 @@
         <div class="mode-container">
             <div class="mode-card" onclick="initHost()">
                 <h2>📺 מציג (Host)</h2>
-                <p>עבור המסך הראשי בכיתה</p>
+                <p>עבור המסך הראשי בכיתה / טלוויזיה</p>
             </div>
             <div class="mode-card" onclick="showScreen('screen-join')">
                 <h2>📱 צוער (Player)</h2>
-                <p>עבור הנייד האישי</p>
+                <p>עבור הסמארטפון האישי</p>
             </div>
         </div>
     </div>
@@ -185,7 +198,7 @@
         <h3 id="mobile-status">ממתין לתחילת השאלה...</h3>
         <div id="mobile-question-area" style="display: none;">
             <h3 id="mobile-q-num" style="color: var(--accent-gold);"></h3>
-            <p id="mobile-q-text" style="color: #fff; font-weight: bold; margin-bottom: 1rem;"></p>
+            <p id="mobile-q-text" style="color: #fff; font-weight: bold; margin-bottom: 1rem; font-size: 1.2rem; text-align: right;"></p>
             <button class="mobile-opt-btn opt-a" onclick="sendAnswer('א')">▲ א. <span id="m-opt-a"></span></button>
             <button class="mobile-opt-btn opt-b" onclick="sendAnswer('ב')">◆ ב. <span id="m-opt-b"></span></button>
             <button class="mobile-opt-btn opt-c" onclick="sendAnswer('ג')">● ג. <span id="m-opt-c"></span></button>
@@ -193,20 +206,20 @@
         </div>
         <div id="mobile-feedback" style="display: none;">
             <h1 id="feedback-text"></h1>
-            <p id="feedback-score"></p>
+            <p id="feedback-score" style="font-size: 1.3rem; margin-top: 1rem;"></p>
         </div>
     </div>
 
     <!-- Screen 4: Host Lobby -->
     <div id="screen-host-lobby" class="screen">
         <h2>לובי מציג</h2>
-        <h3>קוד משחק (PIN): <span id="host-pin-display" style="color: var(--accent-green);">------</span></h3>
+        <h3 style="font-size: 1.5rem;">קוד משחק (PIN): <span id="host-pin-display" style="color: var(--accent-green); font-size: 2.5rem;">------</span></h3>
         <div style="margin: 1.5rem 0;">
-            <p>להצטרפות, הצוערים נכנסים לקישור ומזינים את ה-PIN</p>
+            <p>הצוערים נכנסים לקישור ומזינים את קוד המשחק (PIN)</p>
         </div>
         <h3>צוערים שהתחברו (<span id="player-count">0</span>):</h3>
-        <div id="player-list"></div>
-        <button class="btn" onclick="startQuiz()" style="margin-top: 1rem;">התחל משחק 🚀</button>
+        <div id="player-list" style="min-height: 80px; margin: 1rem 0;"></div>
+        <button class="btn" onclick="startQuiz()" style="font-size: 1.3rem; margin-top: 1rem;">התחל משחק 🚀</button>
     </div>
 
     <!-- Screen 5: Host Question View -->
@@ -215,8 +228,8 @@
             <span id="question-tracker" style="color: var(--accent-gold); font-weight: bold;"></span>
             <span id="answers-submitted-count">תשובות: 0</span>
         </div>
-        <div class="timer-bar" id="timer-bar"></div>
-        <h2 id="question-text" style="text-align: right;"></h2>
+        <div class="timer-container"><div class="timer-bar" id="timer-bar"></div></div>
+        <h2 id="question-text" style="text-align: right; font-size: 1.6rem;"></h2>
 
         <div class="host-options-grid">
             <div id="opt-a" class="host-option opt-a"><span>▲ א. <span id="text-a"></span></span> <span id="count-a">0</span></div>
@@ -225,19 +238,209 @@
             <div id="opt-d" class="host-option opt-d"><span>■ ד. <span id="text-d"></span></span> <span id="count-d">0</span></div>
         </div>
 
-        <div id="correct-players-box" style="display: none; text-align: right; margin: 1rem 0;">
-            <h4 style="color: var(--accent-green);">🎯 ענו נכון:</h4>
+        <div id="correct-players-box" style="display: none; text-align: right; margin: 1rem 0; background: rgba(0,255,102,0.1); padding: 1rem; border-radius: 8px;">
+            <h4 style="color: var(--accent-green); margin-bottom: 0.5rem;">🎯 צוערים שענו נכון על השאלה:</h4>
             <div id="correct-players-list"></div>
         </div>
 
-        <div id="explanation-box" style="display: none; text-align: right; background: rgba(0,0,0,0.4); padding: 1rem; border-right: 3px solid var(--accent-gold);">
-            <h4>💡 הסבר:</h4>
+        <div id="explanation-box" style="display: none; text-align: right; background: rgba(0,0,0,0.5); padding: 1rem; border-right: 4px solid var(--accent-gold); border-radius: 4px;">
+            <h4 style="color: var(--accent-gold); margin-bottom: 0.5rem;">💡 הסבר לימודי:</h4>
             <p id="explanation-text" style="color: #fff; margin: 0;"></p>
         </div>
 
-        <button id="next-btn" class="btn" onclick="nextStep()" style="display: none; margin-top: 1rem;">המשך ➔</button>
+        <button id="next-btn" class="btn" onclick="nextStep()" style="display: none; margin-top: 1.5rem;">המשך ➔</button>
     </div>
 
     <!-- Screen 6: Leaderboard -->
     <div id="screen-leaderboard" class="screen">
-        <h1 id="leaderboard-title">🏆 מובילי הניווט (טופ
+        <h1 id="leaderboard-title">🏆 מובילי הניווט (טופ 5)</h1>
+        <div id="leaderboard-list" style="margin: 2rem 0;"></div>
+        <button id="lb-next-btn" class="btn" onclick="resumeFromLeaderboard()">לשאלה הבאה ➔</button>
+    </div>
+
+    <script>
+        const quizData = [
+            { id: 1, q: "מהי ההגדרה המדויקת ביותר למושג 'ניווט' על פי תורת הלחימה?", options: { א: "הגעה מנקודה א' לנקודה ב' בדרך הקצרה ביותר בלבד.", ב: "אמנות התנועה המדויקת והבטוחה בין נקודות בשטח תוך התבססות על הבנת התוואי והמפה.", ג: "זיהוי עצמים מלאכותיים בשטח באמצעות תצלומי אוויר בלבד.", ד: "מדידת מרחקים במצפן מגנטי בשטח פתוח." }, correct: "ב", exp: "ניווט מוגדר כאמנות התנועה המדויקת והבטוחה בין נקודות בשטח תוך ניתוח והבנה של התוואי והמפה." },
+            { id: 2, q: "מהו ההבדל היסודי בין 'תבליט' לבין 'תכסית' במפה טופוגרפית?", options: { א: "תבליט מייצג קווי גובה וצורות קרקע טבעיות, בעוד תכסית מייצגת עצמים מלאכותיים וכיסוי משתנה.", ב: "תבליט עוסק בצבעי המפה, בעוד תכסית עוסקת בקנה המידה.", ג: "תבליט קיים רק בתצלום אוויר, בעוד תכסית קיימת רק במפה.", ד: "אין הבדל – אלו שני מושגים זהים לתיאור כבישים." }, correct: "א", exp: "תבליט מייצג צורות קרקע טבעיות (קווי גובה), ותכסית מייצגת את הכיסוי המשתנה והמלאכותי על הקרקע." },
+            { id: 3, q: "מה מייצגים קווי גובה (קווי המתווה) במפה טופוגרפית?", options: { א: "גבולות שטח שיפוט מוניציפלי.", ב: "קווים דמיוניים המחברים נקודות בעלות גובה שווה מעל פני הים.", ג: "נתיבי תנועה מומלצים לרק\"ם.", ד: "מרחקים בקילומטרים מנקודת הצפון." }, correct: "ב", exp: "קווי גובה מחברים נקודות בעלות גובה שווה ומאפשרים להבין את השיפועים וצורת הקרקע." }
+        ];
+
+        let peer = null, connections = [], hostConn = null, myPin = "", playerName = "";
+        let players = {}, currentQIndex = 0, timerInterval = null, timeLeft = 20, answersReceived = {}, stepState = "question";
+
+        function showScreen(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+
+        function initHost() {
+            myPin = Math.floor(100000 + Math.random() * 900000).toString();
+            showScreen('screen-host-lobby');
+            document.getElementById('host-pin-display').innerText = myPin;
+
+            peer = new Peer("quiz-host-" + myPin);
+            peer.on('connection', (conn) => {
+                connections.push(conn);
+                conn.on('data', (data) => handleHostMessage(conn, data));
+            });
+        }
+
+        function handleHostMessage(conn, data) {
+            if (data.type === 'JOIN') {
+                players[conn.peer] = { conn: conn, name: data.name, score: 0 };
+                updateLobbyUI();
+            } else if (data.type === 'ANSWER') {
+                if (stepState === 'question' && !answersReceived[conn.peer]) {
+                    answersReceived[conn.peer] = { answer: data.answer, timeBonus: timeLeft };
+                    document.getElementById('answers-submitted-count').innerText = `תשובות: ${Object.keys(answersReceived).length} / ${Object.keys(players).length}`;
+                    if (Object.keys(answersReceived).length >= Object.keys(players).length) endQuestionTimer();
+                }
+            }
+        }
+
+        function updateLobbyUI() {
+            let list = document.getElementById('player-list');
+            list.innerHTML = "";
+            let keys = Object.keys(players);
+            document.getElementById('player-count').innerText = keys.length;
+            keys.forEach(k => {
+                let chip = document.createElement('span');
+                chip.className = 'player-chip';
+                chip.innerText = players[k].name;
+                list.appendChild(chip);
+            });
+        }
+
+        function startQuiz() {
+            if (Object.keys(players).length === 0) { alert("יש להמתין להצטרפות צוער אחד לפחות!"); return; }
+            currentQIndex = 0;
+            loadQuestion(currentQIndex);
+        }
+
+        function loadQuestion(index) {
+            stepState = "question";
+            answersReceived = {};
+            timeLeft = 20;
+            let qData = quizData[index];
+
+            showScreen('screen-host-question');
+            document.getElementById('question-tracker').innerText = `שאלה ${index + 1} / ${quizData.length}`;
+            document.getElementById('question-text').innerText = qData.q;
+            document.getElementById('text-a').innerText = qData.options.א;
+            document.getElementById('text-b').innerText = qData.options.ב;
+            document.getElementById('text-c').innerText = qData.options.ג;
+            document.getElementById('text-d').innerText = qData.options.ד;
+
+            ['a','b','c','d'].forEach(k => {
+                document.getElementById(`count-${k}`).innerText = '0';
+                document.getElementById(`opt-${k}`).classList.remove('correct-answer');
+            });
+
+            document.getElementById('correct-players-box').style.display = 'none';
+            document.getElementById('explanation-box').style.display = 'none';
+            document.getElementById('next-btn').style.display = 'none';
+
+            broadcast({ type: 'NEW_QUESTION', questionNum: index + 1, questionText: qData.q, options: qData.options });
+
+            document.getElementById('timer-bar').style.width = '100%';
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                document.getElementById('timer-bar').style.width = (timeLeft / 20 * 100) + '%';
+                if (timeLeft <= 0) endQuestionTimer();
+            }, 1000);
+        }
+
+        function endQuestionTimer() {
+            clearInterval(timerInterval);
+            stepState = "answer";
+            let qData = quizData[currentQIndex];
+            let counts = { א: 0, ב: 0, ג: 0, ד: 0 }, correctList = [];
+
+            Object.keys(answersReceived).forEach(pId => {
+                let ans = answersReceived[pId].answer;
+                if (counts[ans] !== undefined) counts[ans]++;
+                let isCorrect = (ans === qData.correct);
+                let pts = isCorrect ? (500 + answersReceived[pId].timeBonus * 25) : 0;
+                if (isCorrect && players[pId]) { players[pId].score += pts; correctList.push(players[pId].name); }
+                if (players[pId] && players[pId].conn) {
+                    players[pId].conn.send({ type: 'RESULT', isCorrect: isCorrect, totalScore: players[pId].score });
+                }
+            });
+
+            document.getElementById('count-a').innerText = counts['א'];
+            document.getElementById('count-b').innerText = counts['ב'];
+            document.getElementById('count-c').innerText = counts['ג'];
+            document.getElementById('count-d').innerText = counts['ד'];
+
+            let map = { 'א': 'a', 'ב': 'b', 'ג': 'c', 'ד': 'd' };
+            document.getElementById(`opt-${map[qData.correct]}`).classList.add('correct-answer');
+
+            let cBox = document.getElementById('correct-players-list');
+            cBox.innerHTML = correctList.length ? correctList.map(n => `<span class="player-chip">✓ ${n}</span>`).join('') : 'אף צוער לא ענה נכון.';
+            document.getElementById('correct-players-box').style.display = 'block';
+
+            document.getElementById('explanation-text').innerText = qData.exp;
+            document.getElementById('explanation-box').style.display = 'block';
+            document.getElementById('next-btn').style.display = 'inline-block';
+        }
+
+        function nextStep() {
+            if (currentQIndex === quizData.length - 1) showLeaderboard();
+            else { currentQIndex++; loadQuestion(currentQIndex); }
+        }
+
+        function showLeaderboard() {
+            showScreen('screen-leaderboard');
+            let sorted = Object.values(players).sort((a,b) => b.score - a.score);
+            document.getElementById('leaderboard-list').innerHTML = sorted.slice(0,5).map((p,i) => `<div style="padding:0.8rem; margin-bottom:0.5rem; background:rgba(255,255,255,0.05); border-radius:6px; font-size:1.3rem;">#${i+1} ${p.name} - ${p.score} נק'</div>`).join('');
+        }
+
+        function resumeFromLeaderboard() { currentQIndex++; loadQuestion(currentQIndex); }
+        function broadcast(data) { connections.forEach(c => { if(c.open) c.send(data); }); }
+
+        function joinGame() {
+            let pin = document.getElementById('game-pin-input').value.trim();
+            playerName = document.getElementById('player-name-input').value.trim();
+            if (!pin || !playerName) return alert("הזן קוד משחק ושם!");
+
+            peer = new Peer();
+            peer.on('open', () => {
+                hostConn = peer.connect("quiz-host-" + pin);
+                hostConn.on('open', () => {
+                    hostConn.send({ type: 'JOIN', name: playerName });
+                    showScreen('screen-mobile-game');
+                });
+                hostConn.on('data', handleMobileMessage);
+            });
+        }
+
+        function handleMobileMessage(data) {
+            if (data.type === 'NEW_QUESTION') {
+                showScreen('screen-mobile-game');
+                document.getElementById('mobile-q-num').innerText = `שאלה ${data.questionNum}`;
+                document.getElementById('mobile-q-text').innerText = data.questionText;
+                document.getElementById('m-opt-a').innerText = data.options.א;
+                document.getElementById('m-opt-b').innerText = data.options.ב;
+                document.getElementById('m-opt-c').innerText = data.options.ג;
+                document.getElementById('m-opt-d').innerText = data.options.ד;
+                document.getElementById('mobile-question-area').style.display = 'block';
+                document.getElementById('mobile-feedback').style.display = 'none';
+            } else if (data.type === 'RESULT') {
+                document.getElementById('mobile-question-area').style.display = 'none';
+                document.getElementById('mobile-feedback').style.display = 'block';
+                document.getElementById('feedback-text').innerText = data.isCorrect ? "🎯 תשובה נכונה!" : "❌ תשובה שגויה";
+                document.getElementById('feedback-score').innerText = `סה"כ ניקוד: ${data.totalScore}`;
+            }
+        }
+
+        function sendAnswer(ans) {
+            if (hostConn) {
+                hostConn.send({ type: 'ANSWER', answer: ans });
+                document.getElementById('mobile-question-area').style.display = 'none';
+                document.getElementById('mobile-status').innerText = "תשובתך נקלטה! ממתין לשאר הצוערים...";
+            }
+        }
+    </script>
+</body>
+</html>
