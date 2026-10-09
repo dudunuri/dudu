@@ -4,16 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>בוחן מקיף: ניווט, טופוגרפיה ותצ"א</title>
-    <!-- PeerJS for Realtime Peer-to-Peer Communication -->
+    <!-- PeerJS Realtime Connection -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.4.7/peerjs.min.js"></script>
 
     <style>
         :root {
             --bg-gradient: linear-gradient(135deg, #050b08 0%, #0d1a14 50%, #050806 100%);
-            --panel-bg: rgba(15, 25, 20, 0.75);
-            --panel-border: rgba(0, 255, 102, 0.2);
+            --panel-bg: rgba(15, 25, 20, 0.85);
+            --panel-border: rgba(0, 255, 102, 0.25);
             --accent-green: #00ff66;
-            --accent-green-glow: rgba(0, 255, 102, 0.4);
+            --accent-green-glow: rgba(0, 255, 102, 0.35);
             --accent-gold: #ffcc00;
             --text-main: #f0f8f4;
             --text-muted: #9ab3a5;
@@ -34,11 +34,10 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 1rem;
+            padding: 0.75rem;
             overflow-x: hidden;
         }
 
-        /* Modern Glassmorphism Cards */
         .screen {
             display: none;
             width: 100%;
@@ -46,7 +45,7 @@
             background: var(--panel-bg);
             border: 1px solid var(--panel-border);
             border-radius: 20px;
-            padding: 2rem;
+            padding: 1.5rem;
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
             box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 30px rgba(0, 255, 102, 0.05);
@@ -57,24 +56,25 @@
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
-        h1 { font-size: 1.8rem; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 0.5rem; text-shadow: 0 0 20px var(--accent-green-glow); }
-        h2 { font-size: 1.4rem; font-weight: 700; margin-bottom: 1rem; }
-        p { color: var(--text-muted); font-size: 1.05rem; margin-bottom: 1.5rem; }
+        h1 { font-size: 1.7rem; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 0.5rem; text-shadow: 0 0 20px var(--accent-green-glow); text-align: center; }
+        h2 { font-size: 1.35rem; font-weight: 700; margin-bottom: 0.8rem; text-align: center; }
+        p { color: var(--text-muted); font-size: 1rem; margin-bottom: 1.2rem; text-align: center; }
 
-        /* Buttons & Inputs */
         .btn-action {
             background: linear-gradient(135deg, #00ff66, #00b347);
             border: none;
             color: #021a0d;
-            padding: 1rem 2rem;
-            font-size: 1.2rem;
+            padding: 0.9rem 1.8rem;
+            font-size: 1.15rem;
             font-weight: 800;
             border-radius: 12px;
             cursor: pointer;
             box-shadow: 0 4px 20px rgba(0, 255, 102, 0.3);
             transition: all 0.2s ease;
             width: 100%;
-            max-width: 300px;
+            max-width: 320px;
+            margin: 0.5rem auto;
+            display: block;
         }
 
         .btn-action:active { transform: scale(0.97); }
@@ -82,14 +82,14 @@
         .input-field {
             width: 100%;
             max-width: 400px;
-            padding: 1.1rem;
-            font-size: 1.2rem;
+            padding: 1rem;
+            font-size: 1.15rem;
             font-weight: bold;
             border-radius: 12px;
             border: 1px solid var(--panel-border);
             background: rgba(0, 0, 0, 0.5);
             color: #fff;
-            margin-bottom: 1.2rem;
+            margin-bottom: 1rem;
             text-align: center;
             outline: none;
             transition: border-color 0.2s;
@@ -97,35 +97,34 @@
 
         .input-field:focus { border-color: var(--accent-green); box-shadow: 0 0 15px var(--accent-green-glow); }
 
-        /* Mode Selection Cards */
         .mode-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-            gap: 1.5rem;
-            margin-top: 1.5rem;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.2rem;
+            margin-top: 1.2rem;
         }
 
         .mode-card {
             background: rgba(255, 255, 255, 0.03);
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 16px;
-            padding: 2rem 1.5rem;
+            padding: 1.8rem 1.2rem;
             cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.3s ease;
+            text-align: center;
         }
 
         .mode-card:hover {
             border-color: var(--accent-green);
-            transform: translateY(-5px);
+            transform: translateY(-4px);
             background: rgba(0, 255, 102, 0.05);
             box-shadow: 0 10px 30px rgba(0, 255, 102, 0.15);
         }
 
-        /* Layout Split for Host (Side Leaderboard + Main View) */
         .host-split {
             display: grid;
-            grid-template-columns: 280px 1fr;
-            gap: 1.5rem;
+            grid-template-columns: 270px 1fr;
+            gap: 1.2rem;
             text-align: right;
         }
 
@@ -137,15 +136,15 @@
             background: rgba(0, 0, 0, 0.4);
             border: 1px solid var(--panel-border);
             border-radius: 14px;
-            padding: 1.2rem;
+            padding: 1rem;
         }
 
         .side-lb-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0.7rem 0.9rem;
-            margin-bottom: 0.5rem;
+            padding: 0.6rem 0.8rem;
+            margin-bottom: 0.4rem;
             background: rgba(255, 255, 255, 0.03);
             border-radius: 8px;
             font-weight: 700;
@@ -154,18 +153,21 @@
 
         .side-lb-item:nth-child(1) { border-right: 4px solid var(--accent-gold); color: var(--accent-gold); }
 
-        /* Host Grid Options */
         .host-options-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-            margin: 1.2rem 0;
+            gap: 0.8rem;
+            margin: 1rem 0;
+        }
+
+        @media (max-width: 600px) {
+            .host-options-grid { grid-template-columns: 1fr; }
         }
 
         .host-opt {
-            padding: 1.1rem;
+            padding: 1rem;
             border-radius: 12px;
-            font-size: 1.1rem;
+            font-size: 1.05rem;
             font-weight: 700;
             color: #fff;
             display: flex;
@@ -181,14 +183,13 @@
 
         .correct-highlight { border: 3px solid #fff; box-shadow: 0 0 25px #fff; transform: scale(1.02); }
 
-        /* Timer Bar */
         .timer-track {
             width: 100%;
             height: 10px;
             background: rgba(255, 255, 255, 0.1);
             border-radius: 5px;
             overflow: hidden;
-            margin: 1rem 0;
+            margin: 0.8rem 0;
         }
 
         .timer-fill {
@@ -198,23 +199,23 @@
             transition: width 1s linear;
         }
 
-        /* Mobile Player Layout */
         .mobile-opt-btn {
             width: 100%;
             border: none;
             border-radius: 14px;
             color: #fff;
-            padding: 1.2rem 1.5rem;
-            font-size: 1.15rem;
+            padding: 1.1rem 1.2rem;
+            font-size: 1.1rem;
             font-weight: 700;
-            margin-bottom: 0.9rem;
+            margin-bottom: 0.8rem;
             text-align: right;
             cursor: pointer;
-            box-shadow: 0 6px 15px rgba(0,0,0,0.4);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.4);
             display: flex;
             align-items: center;
             gap: 12px;
             transition: transform 0.1s;
+            touch-action: manipulation;
         }
 
         .mobile-opt-btn:active { transform: scale(0.96); }
@@ -222,3 +223,159 @@
         .badge-chip {
             background: rgba(0, 255, 102, 0.15);
             border: 1px solid var(--accent-green);
+            color: var(--accent-green);
+            padding: 5px 12px;
+            border-radius: 20px;
+            display: inline-block;
+            margin: 3px;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        .audio-ctrl {
+            position: fixed;
+            top: 12px;
+            left: 12px;
+            z-index: 100;
+            background: rgba(0,0,0,0.7);
+            border: 1px solid var(--panel-border);
+            color: var(--text-main);
+            padding: 6px 14px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: bold;
+            backdrop-filter: blur(8px);
+        }
+    </style>
+</head>
+<body>
+
+    <button id="audio-toggle" class="audio-ctrl">🔊 צלילים: פעילים</button>
+
+    <!-- Screen 1: Role Selection -->
+    <div id="screen-select" class="screen active">
+        <h1>בוחן מקיף: ניווט, טופוגרפיה ותצ"א</h1>
+        <p>מערכת אינטראקטיבית בזמן אמת</p>
+        
+        <div class="mode-grid">
+            <div class="mode-card" onclick="initHost()">
+                <h2 style="color: var(--accent-green);">📺 מציג (Host)</h2>
+                <p>עבור המסך הראשי בכיתה / טלוויזיה. מציג את השאלות, קוד המשחק ולוח המובילים.</p>
+            </div>
+            <div class="mode-card" onclick="showScreen('screen-join')">
+                <h2 style="color: var(--accent-gold);">📱 צוער (Player)</h2>
+                <p>עבור הנייד האישי. מענה על שאלות וצפייה בניקוד בזמן אמת.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Screen 2: Join Game -->
+    <div id="screen-join" class="screen">
+        <h2>הצטרפות למשחק</h2>
+        <p>הזן קוד משחק ושם צוער להתחברות</p>
+        <div style="display: flex; flex-direction: column; align-items: center;">
+            <input type="text" id="game-pin-input" class="input-field" placeholder="קוד משחק (PIN)">
+            <input type="text" id="player-name-input" class="input-field" placeholder="שם הצוער / צוות">
+            <button class="btn-action" onclick="joinGame()">התחבר למשחק</button>
+        </div>
+    </div>
+
+    <!-- Screen 3: Mobile Controller UI -->
+    <div id="screen-mobile-game" class="screen">
+        <h3 id="mobile-status" style="margin-bottom: 1rem; text-align: center;">ממתין לתחילת השאלה...</h3>
+        
+        <div id="mobile-question-area" style="display: none;">
+            <div style="background: rgba(0,0,0,0.4); border: 1px solid var(--panel-border); padding: 1rem; border-radius: 12px; margin-bottom: 1rem; text-align: right;">
+                <span id="mobile-q-num" style="color: var(--accent-gold); font-size: 0.9rem; font-weight: bold;"></span>
+                <h3 id="mobile-q-text" style="color: #fff; margin-top: 0.3rem; font-size: 1.1rem; font-weight: 700; text-align: right;"></h3>
+            </div>
+
+            <button class="mobile-opt-btn opt-a" onclick="sendAnswer('א')"><span>▲</span> <span id="m-opt-a"></span></button>
+            <button class="mobile-opt-btn opt-b" onclick="sendAnswer('ב')"><span>◆</span> <span id="m-opt-b"></span></button>
+            <button class="mobile-opt-btn opt-c" onclick="sendAnswer('ג')"><span>●</span> <span id="m-opt-c"></span></button>
+            <button class="mobile-opt-btn opt-d" onclick="sendAnswer('ד')"><span>■</span> <span id="m-opt-d"></span></button>
+        </div>
+
+        <div id="mobile-feedback" style="display: none; padding: 1.5rem 0; text-align: center;">
+            <h1 id="feedback-text" style="font-size: 2rem;"></h1>
+            <p id="feedback-score" style="font-size: 1.2rem; color: #fff; margin-top: 0.8rem;"></p>
+        </div>
+    </div>
+
+    <!-- Screen 4: Host Lobby -->
+    <div id="screen-host-lobby" class="screen">
+        <h2>לובי מציג</h2>
+        <p>הצוערים מזינים בנייד את קוד המשחק הבא:</p>
+        <h1 id="host-pin-display" style="font-size: 3.5rem; color: var(--accent-green); letter-spacing: 4px; margin: 1rem 0;">------</h1>
+        
+        <h3>צוערים שהתחברו (<span id="player-count">0</span>):</h3>
+        <div id="player-list" style="min-height: 70px; margin: 1.2rem 0; text-align: center;"></div>
+        
+        <button class="btn-action" onclick="startQuiz()">התחל משחק 🚀</button>
+    </div>
+
+    <!-- Screen 5: Host Question View -->
+    <div id="screen-host-question" class="screen">
+        <div class="host-split">
+            
+            <!-- Side Leaderboard -->
+            <div class="side-lb">
+                <h3 style="color: var(--accent-gold); font-size: 1.05rem; border-bottom: 1px solid var(--panel-border); padding-bottom: 0.4rem; margin-bottom: 0.8rem; text-align: center;">🏆 טופ 5 המובילים</h3>
+                <div id="side-leaderboard-list">
+                    <p style="font-size: 0.85rem; text-align: center;">טרם נקלטו נתונים</p>
+                </div>
+            </div>
+
+            <!-- Question Main Panel -->
+            <div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span id="question-tracker" style="color: var(--accent-gold); font-weight: bold; font-size: 1.05rem;"></span>
+                    <span id="answers-submitted-count" style="font-size: 0.95rem; color: var(--text-muted);">תשובות: 0</span>
+                </div>
+
+                <div class="timer-track"><div id="timer-bar" class="timer-fill"></div></div>
+
+                <h2 id="question-text" style="font-size: 1.3rem; margin-bottom: 1rem; line-height: 1.4; text-align: right;"></h2>
+
+                <div class="host-options-grid">
+                    <div id="opt-a" class="host-opt opt-a"><span>▲ א. <span id="text-a"></span></span> <span id="count-a">0</span></div>
+                    <div id="opt-b" class="host-opt opt-b"><span>◆ ב. <span id="text-b"></span></span> <span id="count-b">0</span></div>
+                    <div id="opt-c" class="host-opt opt-c"><span>● ג. <span id="text-c"></span></span> <span id="count-c">0</span></div>
+                    <div id="opt-d" class="host-opt opt-d"><span>■ ד. <span id="text-d"></span></span> <span id="count-d">0</span></div>
+                </div>
+
+                <div id="correct-players-box" style="display: none; background: rgba(0, 255, 102, 0.08); border: 1px solid var(--accent-green); padding: 0.8rem; border-radius: 10px; margin-bottom: 0.8rem;">
+                    <h4 style="color: var(--accent-green); font-size: 0.95rem; margin-bottom: 0.4rem;">🎯 צוערים שענו נכון:</h4>
+                    <div id="correct-players-list"></div>
+                </div>
+
+                <div id="explanation-box" style="display: none; background: rgba(0,0,0,0.5); padding: 0.9rem; border-right: 4px solid var(--accent-gold); border-radius: 6px; margin-bottom: 1rem;">
+                    <h4 style="color: var(--accent-gold); font-size: 0.95rem; margin-bottom: 0.3rem;">💡 הסבר לימודי:</h4>
+                    <p id="explanation-text" style="color: #fff; margin: 0; font-size: 0.95rem; line-height: 1.4;"></p>
+                </div>
+
+                <button id="next-btn" class="btn-action" onclick="nextStep()" style="display: none; width: 100%; max-width: 100%;">השאלה הבאה ➔</button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Screen 6: Final Leaderboard -->
+    <div id="screen-leaderboard" class="screen">
+        <h1 id="leaderboard-title">🏆 אלופי הניווט</h1>
+        <div id="leaderboard-list" style="margin: 1.5rem 0;"></div>
+        <button class="btn-action" onclick="location.reload()">התחל מחדש 🔄</button>
+    </div>
+
+    <script>
+        // --- COMPLETE 27 QUESTIONS DATASET ---
+        const quizData = [
+            { id: 1, q: "מהי ההגדרה המדויקת ביותר למושג 'ניווט' על פי תורת הלחימה?", options: { א: "הגעה מנקודה א' לנקודה ב' בדרך הקצרה ביותר בלבד.", ב: "אמנות התנועה המדויקת והבטוחה בין נקודות בשטח תוך התבססות על הבנת התוואי והמפה.", ג: "זיהוי עצמים מלאכותיים בשטח באמצעות תצלומי אוויר בלבד.", ד: "מדידת מרחקים במצפן מגנטי בשטח פתוח." }, correct: "ב", exp: "ניווט מוגדר כאמנות התנועה המדויקת והבטוחה בין נקודות בשטח תוך ניתוח והבנה של התוואי והמפה." },
+            { id: 2, q: "מהו ההבדל היסודי בין 'תבליט' לבין 'תכסית' במפה טופוגרפית?", options: { א: "תבליט מייצג קווי גובה וצורות קרקע טבעיות, בעוד תכסית מייצגת עצמים מלאכותיים וכיסוי משתנה.", ב: "תבליט עוסק בצבעי המפה, בעוד תכסית עוסקת בקנה המידה.", ג: "תבליט קיים רק בתצלום אוויר, בעוד תכסית קיימת רק במפה.", ד: "אין הבדל – אלו שני מושגים זהים לתיאור כבישים." }, correct: "א", exp: "תבליט מייצג צורות קרקע טבעיות (קווי גובה), ותכסית מייצגת את הכיסוי המשתנה והמלאכותי על הקרקע." },
+            { id: 3, q: "מה מייצגים קווי גובה (קווי המתווה) במפה טופוגרפית?", options: { א: "גבולות שטח שיפוט מוניציפלי.", ב: "קווים דמיוניים המחברים נקודות בעלות גובה שווה מעל פני הים.", ג: "נתיבי תנועה מומלצים לרק\"ם.", ד: "מרחקים בקילומטרים מנקודת הצפון." }, correct: "ב", exp: "קווי גובה מחברים נקודות בעלות גובה שווה ומאפשרים להבין את השיפועים וצורת הקרקע." },
+            { id: 4, q: "מהי צורת התבליט שבה מכל נקודה במרכז יש ירידה ל-4 כיוונים שונים?", options: { א: "שלוחה.", ב: "כיפה.", ג: "גיא.", ד: "אוכף." }, correct: "ב", exp: "כיפה היא צורת תבליט שבמרכזה הנקודה הגבוהה ביותר וממנה יורדים ל-4 כיוונים." },
+            { id: 5, q: "כיצד ניתן להבחין במפה בין 'שלוחה' לבין 'גיא'?", options: { א: "שלוחה מוקפת ב-3 ירידות ועלייה אחת, בעוד גיא מוקף ב-3 עליות וירידה אחת.", ב: "שלוחה תמיד מסומנת בצבע כחול, וגיא בצבע חום.", ג: "בגיא קווי הגובה קרובים מאוד, ובשלוחה הם מרוחקים.", ד: "שלוחה פונה תמיד לכיוון צפון, וגיא פונה לדרום." }, correct: "א", exp: "שלוחה: 3 ירידות ועלייה אחת. גיא: 3 עליות וירידה אחת." },
+            { id: 6, q: "מהם המאפיינים הטופוגרפיים של צורת התבליט 'אוכף'?", options: { א: "4 עליות מכל הכיוונים.", ב: "נקודת חיבור נמוכה בין שתי כיפות – בעלת 2 עליות ו-2 ירידות.", ג: "מישור מוחלט ללא שיפוע כלל.", ד: "מצוק תלול הפונה לכיוון אחד בלבד." }, correct: "ב", exp: "אוכף הוא נקודת חיבור נמוכה בין שתי כיפות: 2 עליות לכיוון הכיפות ו-2 ירידות למדרונות." },
+            { id: 7, q: "מהי ההגדרה של צורת התבליט 'כתף'?", options: { א: "כיפה קטנה בראש הר גבוה.", ב: "קטע מישורי יחסית הממוקם על גבי מדרון.", ג: "חיבור בין שני נחלים מצטלבים.", ד: "אפיק נחל יבש במדבר." }, correct: "ב", exp: "כתף היא מדרגה/קטע מישורי הממוקם על גבי מדרון ההר." },
+            { id: 8, q: "מהו הפער בין 'מרחק אווירי' לבין 'מרחק בפועל' בעת תכנון ציר ניווט?", options: { א: "המרחק האווירי הוא קו ישר במפה, בעוד המרחק בפועל ארוך יותר עקב שיפועים ותוואי הקרקע.", ב: "המרחק האווירי נמדד בק
