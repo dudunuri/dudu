@@ -3,854 +3,103 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>אתגר הניווט והטופוגרפיה - משחק תחרותי</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- QR Code Generator -->
+    <title>בוחן מקיף: ניווט, טופוגרפיה ופענוח תצ"א</title>
+    <!-- CSS & JS External Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.4.7/peerjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <!-- Canvas Confetti for Leaderboard -->
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Rubik:wght@400;600;700;900&display=swap');
+        :root {
+            --bg-dark: #0a0f0d;
+            --panel-bg: rgba(18, 28, 22, 0.85);
+            --border-color: #2a4735;
+            --accent-green: #00ff66;
+            --accent-gold: #ffd700;
+            --text-main: #e0f0e5;
+            --text-muted: #8ba895;
+            
+            --btn-red: #d32f2f;
+            --btn-blue: #1976d2;
+            --btn-yellow: #f57c00;
+            --btn-green: #388e3c;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+
         body {
-            font-family: 'Rubik', sans-serif;
-            user-select: none;
-        }
-        .animate-bounce-short {
-            animation: bounce 0.6s ease infinite alternate;
-        }
-        @keyframes bounce {
-            from { transform: translateY(0); }
-            to { transform: translateY(-10px); }
-        }
-        .option-btn {
-            transition: transform 0.15s ease, box-shadow 0.15s ease;
-        }
-        .option-btn:active {
-            transform: scale(0.96);
-        }
-    </style>
-</head>
-<body class="bg-slate-900 text-white min-h-screen flex flex-col justify-between overflow-x-hidden">
-
-
-    <!-- Header Navigation -->
-    <header class="bg-slate-800/80 backdrop-blur border-b border-slate-700 p-4 sticky top-0 z-50 flex justify-between items-center shadow-lg">
-        <div class="flex items-center space-x-3 space-x-reverse">
-            <div class="bg-indigo-600 text-white p-2 rounded-xl font-black text-xl shadow-inner">
-                <i class="fa-solid fa-compass"></i>
-            </div>
-            <div>
-                <h1 class="font-bold text-lg md:text-xl text-indigo-300">בוחן ניווט ותצ"א תחרותי</h1>
-                <p id="subHeaderStatus" class="text-xs text-slate-400">בחר מצב הפעלה להמשך</p>
-            </div>
-        </div>
-        <div id="sessionBadge" class="hidden bg-indigo-950/80 border border-indigo-500/40 px-4 py-1.5 rounded-full text-indigo-200 font-mono text-sm tracking-widest flex items-center gap-2">
-            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-            קוד משחק: <span id="gamePinDisplay" class="font-black text-white text-base">------</span>
-        </div>
-    </header>
-
-    <main class="flex-grow flex items-center justify-center p-4">
-
-        <!-- Mode Selection View -->
-        <div id="modeSelectView" class="max-w-xl w-full bg-slate-800 border border-slate-700 rounded-3xl p-8 text-center shadow-2xl space-y-8">
-            <div class="space-y-3">
-                <div class="inline-block p-4 bg-indigo-500/10 rounded-full text-indigo-400 text-4xl mb-2">
-                    <i class="fa-solid fa-trophy"></i>
-                </div>
-                <h2 class="text-3xl font-black text-white">ברוכים הבאים למשחק!</h2>
-                <p class="text-slate-400 text-sm">בחר באיזה כובע ברצונך להיכנס למערכת:</p>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <button onclick="startHostMode()" class="flex flex-col items-center justify-center p-6 bg-gradient-to-br from-indigo-600 to-blue-700 hover:from-indigo-500 hover:to-blue-600 rounded-2xl shadow-lg border border-indigo-400/30 transition transform hover:-translate-y-1">
-                    <i class="fa-solid fa-tv text-4xl mb-3 text-indigo-200"></i>
-                    <span class="font-bold text-lg">מסך ראשי (טלוויזיה / מרצה)</span>
-                    <span class="text-xs text-indigo-200 mt-1">מציג שאלות, ניקוד ודירוגים</span>
-                </button>
-
-                <button onclick="startPlayerMode()" class="flex flex-col items-center justify-center p-6 bg-gradient-to-br from-emerald-600 to-teal-700 hover:from-emerald-500 hover:to-teal-600 rounded-2xl shadow-lg border border-emerald-400/30 transition transform hover:-translate-y-1">
-                    <i class="fa-solid fa-mobile-screen-button text-4xl mb-3 text-emerald-200"></i>
-                    <span class="font-bold text-lg">מסך צוער (טלפון נייד)</span>
-                    <span class="text-xs text-emerald-200 mt-1">להצטרפות ועניית תשובות</span>
-                </button>
-            </div>
-        </div>
-
-        <!-- HOST: Lobby Screen -->
-        <div id="hostLobbyView" class="hidden max-w-4xl w-full bg-slate-800 border border-slate-700 rounded-3xl p-8 shadow-2xl flex flex-col md:flex-row gap-8 items-center">
-            <div class="flex-1 space-y-6 text-center md:text-right">
-                <div>
-                    <span class="bg-indigo-500/20 text-indigo-300 text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider">לובי המשחק</span>
-                    <h2 class="text-3xl font-black text-white mt-2">סרקו את קוד ה-QR והצטרפו!</h2>
-                    <p class="text-slate-400 text-sm mt-1">או היכנסו לקישור והזינו את קוד המשחק.</p>
-                </div>
-
-                <div class="bg-slate-900/80 border border-slate-700 p-4 rounded-2xl flex items-center justify-between">
-                    <div>
-                        <div class="text-xs text-slate-400">קוד הצטרפות:</div>
-                        <div id="lobbyPinDisplay" class="text-4xl font-black font-mono text-emerald-400 tracking-wider">000000</div>
-                    </div>
-                    <button onclick="copyGameLink()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl border border-slate-600 flex items-center gap-2">
-                        <i class="fa-regular fa-copy"></i> העתק קישור
-                    </button>
-                </div>
-
-                <div>
-                    <h3 class="text-sm font-semibold text-slate-300 mb-3 flex items-center gap-2 justify-center md:justify-start">
-                        <i class="fa-solid fa-users text-indigo-400"></i> משתתפים מחוברים (<span id="playerCount">0</span>):
-                    </h3>
-                    <div id="lobbyPlayersList" class="flex flex-wrap gap-2 max-h-48 overflow-y-auto p-2 bg-slate-900/40 rounded-xl border border-slate-800 min-h-[80px] justify-center md:justify-start">
-                        <span class="text-slate-500 text-xs my-auto italic">ממתין להתחברות צוערים...</span>
-                    </div>
-                </div>
-
-                <button onclick="startQuiz()" id="btnStartQuiz" class="w-full py-4 bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 text-slate-950 font-black text-xl rounded-2xl shadow-lg transition transform hover:scale-[1.02] flex items-center justify-center gap-3">
-                    <i class="fa-solid fa-play"></i> התחל את המשחק!
-                </button>
-            </div>
-
-            <div class="bg-white p-6 rounded-3xl shadow-xl flex flex-col items-center justify-center border-4 border-indigo-500/30">
-                <div id="qrcode" class="mb-3"></div>
-                <p class="text-slate-700 font-bold text-xs text-center">סרוק בטלפון להצטרפות</p>
-            </div>
-        </div>
-
-        <!-- HOST: Question View -->
-        <div id="hostQuestionView" class="hidden max-w-5xl w-full space-y-6">
-            <!-- Question Top Bar -->
-            <div class="flex justify-between items-center bg-slate-800/80 p-4 rounded-2xl border border-slate-700">
-                <div class="flex items-center space-x-3 space-x-reverse">
-                    <span class="bg-indigo-600 text-white font-bold text-sm px-3 py-1.5 rounded-xl" id="questionNumBadge">שאלה 1 מתוך 27</span>
-                </div>
-                <div class="flex items-center gap-4">
-                    <div class="text-center">
-                        <span class="text-xs text-slate-400 block">ענו</span>
-                        <span id="answeredCount" class="text-xl font-bold text-emerald-400">0 / 0</span>
-                    </div>
-                    <div class="w-16 h-16 rounded-full border-4 border-indigo-500 flex items-center justify-center bg-slate-900 font-black text-2xl text-yellow-400 shadow-inner" id="timerDisplay">
-                        30
-                    </div>
-                </div>
-            </div>
-
-            <!-- Question Card -->
-            <div class="bg-slate-800 border border-slate-700 rounded-3xl p-8 shadow-2xl space-y-6 text-center">
-                <h2 id="hostQuestionText" class="text-2xl md:text-3xl font-black text-white leading-relaxed">
-                    טוען שאלה...
-                </h2>
-
-                <!-- Options Grid for Host -->
-                <div id="hostOptionsGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4 text-right">
-                    <!-- Options injected here -->
-                </div>
-            </div>
-
-            <!-- Chart / Explanation Bar -->
-            <div id="hostExplanationBox" class="hidden bg-slate-800/90 border border-indigo-500/40 rounded-3xl p-6 space-y-4 shadow-xl">
-                <div class="flex items-start gap-3">
-                    <i class="fa-solid fa-lightbulb text-yellow-400 text-2xl mt-1"></i>
-                    <div>
-                        <h4 class="font-bold text-indigo-300 text-sm">הסבר מפורט:</h4>
-                        <p id="hostExplanationText" class="text-slate-200 text-sm md:text-base mt-1 leading-relaxed"></p>
-                    </div>
-                </div>
-                <button onclick="nextStep()" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-lg rounded-xl shadow transition">
-                    המשך לשאלה הבאה / לוח מובילים <i class="fa-solid fa-arrow-left mr-2"></i>
-                </button>
-            </div>
-        </div>
-
-        <!-- HOST: Leaderboard View (Every 5 questions or end) -->
-        <div id="leaderboardView" class="hidden max-w-3xl w-full bg-slate-800 border border-slate-700 rounded-3xl p-8 text-center space-y-6 shadow-2xl">
-            <div class="space-y-2">
-                <span id="leaderboardTag" class="bg-yellow-500/20 text-yellow-300 text-xs font-bold px-3 py-1 rounded-full uppercase">טבלת מובילים זמנית</span>
-                <h2 class="text-3xl font-black text-white flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-crown text-yellow-400"></i> מובילי המירוץ
-                </h2>
-            </div>
-
-            <div id="leaderboardList" class="space-y-3">
-                <!-- Top players injected here -->
-            </div>
-
-            <button onclick="continueFromLeaderboard()" class="w-full py-4 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-lg rounded-2xl shadow-lg transition">
-                המשך במשחק <i class="fa-solid fa-play mr-2"></i>
-            </button>
-        </div>
-
-        <!-- PLAYER: Join Screen -->
-        <div id="playerJoinView" class="hidden max-w-md w-full bg-slate-800 border border-slate-700 rounded-3xl p-6 text-center space-y-6 shadow-2xl">
-            <div class="space-y-2">
-                <div class="inline-block p-3 bg-emerald-500/10 text-emerald-400 rounded-full text-3xl">
-                    <i class="fa-solid fa-user-plus"></i>
-                </div>
-                <h2 class="text-2xl font-black text-white">הצטרפות לבוחן</h2>
-                <p class="text-slate-400 text-xs">הזן קוד משחק ושם להצטרפות</p>
-            </div>
-
-            <form onsubmit="handlePlayerJoin(event)" class="space-y-4">
-                <div>
-                    <label class="block text-right text-xs font-semibold text-slate-400 mb-1">קוד משחק (PIN)</label>
-                    <input type="text" id="inputPin" required placeholder="לדוגמה: 123456" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-center text-xl font-mono font-bold tracking-widest text-emerald-400 focus:outline-none focus:border-emerald-500">
-                </div>
-                <div>
-                    <label class="block text-right text-xs font-semibold text-slate-400 mb-1">שם מלא / צוות</label>
-                    <input type="text" id="inputName" required placeholder="הזן את שמך..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-center text-lg font-bold text-white focus:outline-none focus:border-indigo-500">
-                </div>
-                <button type="submit" class="w-full py-4 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-lg rounded-xl shadow-lg transition">
-                    כנס למשחק!
-                </button>
-            </form>
-        </div>
-
-        <!-- PLAYER: Waiting View -->
-        <div id="playerWaitingView" class="hidden max-w-md w-full bg-slate-800 border border-slate-700 rounded-3xl p-8 text-center space-y-6 shadow-2xl">
-            <div class="animate-bounce-short text-indigo-400 text-5xl">
-                <i class="fa-solid fa-hourglass-half"></i>
-            </div>
-            <div>
-                <h3 class="text-2xl font-black text-white">אתה בפנים!</h3>
-                <p id="playerNameTag" class="text-emerald-400 font-bold text-lg mt-1"></p>
-                <p class="text-slate-400 text-sm mt-3">הביטו במסך הראשי. המשחק יתחיל מיד...</p>
-            </div>
-        </div>
-
-        <!-- PLAYER: Active Answer Buttons -->
-        <div id="playerAnswerView" class="hidden max-w-md w-full space-y-4">
-            <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700 text-center flex justify-between items-center">
-                <span class="text-slate-400 text-xs" id="playerQIndex">שאלה 1</span>
-                <span id="playerScoreTag" class="text-yellow-400 font-bold text-sm">0 נקודות</span>
-            </div>
-
-            <div class="grid grid-cols-1 gap-3" id="playerButtonsContainer">
-                <button onclick="submitAnswer(0)" class="option-btn p-5 bg-red-600 hover:bg-red-500 rounded-2xl text-white font-bold text-lg flex items-center justify-between shadow-lg">
-                    <span>א. <span class="opt-text-0"></span></span>
-                    <i class="fa-solid fa-square text-2xl opacity-50"></i>
-                </button>
-                <button onclick="submitAnswer(1)" class="option-btn p-5 bg-blue-600 hover:bg-blue-500 rounded-2xl text-white font-bold text-lg flex items-center justify-between shadow-lg">
-                    <span>ב. <span class="opt-text-1"></span></span>
-                    <i class="fa-solid fa-circle text-2xl opacity-50"></i>
-                </button>
-                <button onclick="submitAnswer(2)" class="option-btn p-5 bg-yellow-600 hover:bg-yellow-500 rounded-2xl text-white font-bold text-lg flex items-center justify-between shadow-lg">
-                    <span>ג. <span class="opt-text-2"></span></span>
-                    <i class="fa-solid fa-triangle-exclamation text-2xl opacity-50"></i>
-                </button>
-                <button onclick="submitAnswer(3)" class="option-btn p-5 bg-emerald-600 hover:bg-emerald-500 rounded-2xl text-white font-bold text-lg flex items-center justify-between shadow-lg">
-                    <span>ד. <span class="opt-text-3"></span></span>
-                    <i class="fa-solid fa-diamond text-2xl opacity-50"></i>
-                </button>
-            </div>
-        </div>
-
-        <!-- PLAYER: Feedback View -->
-        <div id="playerFeedbackView" class="hidden max-w-md w-full bg-slate-800 border border-slate-700 rounded-3xl p-8 text-center space-y-6 shadow-2xl">
-            <div id="feedbackIcon" class="text-6xl"></div>
-            <div>
-                <h3 id="feedbackTitle" class="text-3xl font-black"></h3>
-                <p id="feedbackPoints" class="text-slate-300 font-bold text-lg mt-2"></p>
-            </div>
-            <p class="text-slate-400 text-xs">הביטו במסך הראשי לצפייה בהסבר ובתוצאות המלאות.</p>
-        </div>
-
-    </main>
-
-    <script>
-        // Full Quiz Database (27 Questions from document)
-        const quizData = [
-            {
-                q: "מהי ההגדרה המדויקת ביותר למושג 'ניווט' על פי תורת הלחימה?",
-                opts: [
-                    "הגעה מנקודה א' לנקודה ב' בדרך הקצרה ביותר בלבד.",
-                    "אמנות התנועה המדויקת והבטוחה בין נקודות בשטח תוך התבססות על הבנת התוואי והמפה.",
-                    "זיהוי עצמים מלאכותיים בשטח באמצעות תצלומי אוויר בלבד.",
-                    "מדידת מרחקים במצפן מגנטי בשטח פתוח."
-                ],
-                correct: 1,
-                exp: "ניווט מוגדר כאמנות התנועה המדויקת והבטוחה בין נקודות בשטח תוך ניתוח והבנה של התוואי והמפה."
-            },
-            {
-                q: "מהו ההבדל היסודי בין 'תבליט' לבין 'תכסית' במפה טופוגרפית?",
-                opts: [
-                    "תבליט מייצג קווי גובה וצורות קרקע טבעיות, בעוד תכסית מייצגת עצמים מלאכותיים וכיסוי משתנה.",
-                    "תבליט עוסק בצבעי המפה, בעוד תכסית עוסקת בקנה המידה.",
-                    "תבליט קיים רק בתצלום אוויר, בעוד תכסית קיימת רק במפה.",
-                    "אין הבדל – אלו שני מושגים זהים לתיאור כבישים ודרכים."
-                ],
-                correct: 0,
-                exp: "תבליט מייצג את צורות הקרקע הטבעיות (קווי גובה), בעוד תכסית מייצגת את הכיסוי המשתנה והמלאכותי על גבי הקרקע."
-            },
-            {
-                q: "מה מייצגים קווי גובה (קווי המתווה) במפה טופוגרפית?",
-                opts: [
-                    "גבולות שטח שיפוט מוניציפלי.",
-                    "קווים דמיוניים המחברים נקודות בעלות גובה שווה מעל פני הים.",
-                    "נתיבי תנועה מומלצים לרק\"ם.",
-                    "מרחקים בקילומטרים מנקודת הצפון."
-                ],
-                correct: 1,
-                exp: "קווי גובה הם קווים דמיוניים המחברים נקודות בעלות גובה שווה מעל פני הים ומאפשרים ללמוד על השיפועים."
-            },
-            {
-                q: "מהי צורת התבליט שבה מכל נקודה במרכז יש ירידה ל-4 כיוונים שונים?",
-                opts: ["שלוחה", "כיפה", "גיא", "אוכף"],
-                correct: 1,
-                exp: "כיפה היא צורת תבליט שבה מכל נקודה במרכז יש ירידה ל-4 כיוונים שונים."
-            },
-            {
-                q: "כיצד ניתן להבחין במפה בין 'שלוחה' לבין 'גיא'?",
-                opts: [
-                    "שלוחה מוקפת ב-3 ירידות ועלייה אחת, בעוד גיא מוקף ב-3 עליות וירידה אחת.",
-                    "שלוחה תמיד מסומנת בצבע כחול, וגיא בצבע חום.",
-                    "בגיא קווי הגובה קרובים מאוד, ובשלוחה הם מרוחקים.",
-                    "שלוחה פונה תמיד לכיוון צפון, וגיא פונה לדרום."
-                ],
-                correct: 0,
-                exp: "שלוחה מוקפת ב-3 ירידות ועלייה אחת (קודקוד פונה מטה), וגיא מוקף ב-3 עליות וירידה אחת (קודקוד פונה מעלה)."
-            },
-            {
-                q: "מהם המאפיינים הטופוגרפיים של צורת התבליט 'אוכף'?",
-                opts: [
-                    "4 עליות מכל הכיוונים.",
-                    "נקודת חיבור נמוכה בין שתי כיפות – בעלת 2 עליות ו-2 ירידות.",
-                    "מישור מוחלט ללא שיפוע כלל.",
-                    "מצוק תלול הפונה לכיוון אחד בלבד."
-                ],
-                correct: 1,
-                exp: "אוכף הוא נקודת חיבור נמוכה בין שתי כיפות, המאופיין ב-2 עליות לכיפות ו-2 ירידות למדרונות."
-            },
-            {
-                q: "מהי ההגדרה של צורת התבליט 'כתף'?",
-                opts: [
-                    "כיפה קטנה בראש הר גבוה.",
-                    "קטע מישורי יחסית הממוקם על גבי מדרון.",
-                    "חיבור בין שני נחלים מצטלבים.",
-                    "אפיק נחל יבש במדבר."
-                ],
-                correct: 1,
-                exp: "כתף היא קטע מישורי יחסית הממוקם על גבי מדרון הר."
-            },
-            {
-                q: "מהו הפער בין 'מרחק אווירי' לבין 'מרחק בפועל' בעת תכנון ציר ניווט?",
-                opts: [
-                    "המרחק האווירי הוא קו ישר במפה, בעוד המרחק בפועל ארוך יותר עקב שיפועים ותוואי הקרקע.",
-                    "המרחק האווירי נמדד בקילומטרים, והמרחק בפועל נמדד במיילים.",
-                    "המרחק בפועל תמיד קצר יותר מהמרחק האווירי.",
-                    "אין פער – שני המרחקים זהים לחלוטין בכל תוואי שטח."
-                ],
-                correct: 0,
-                exp: "המרחק האווירי הוא קו ישר במפה, בעוד המרחק בפועל ארוך יותר בשל העליות, הירידות ועקיפת המכשולים."
-            },
-            {
-                q: "איזה צבע במקרא המפה מיועד לסימון עצמים מלאכותיים ובנייה מעשי ידי אדם?",
-                opts: ["חום", "כחול", "שחור", "ירוק"],
-                correct: 2,
-                exp: "במקרא המפה: שחור = עצמים מלאכותיים/בנייה, חום = תבליט/קווי גובה, כחול = מים, ירוק = צמחייה."
-            },
-            {
-                q: "באיזה עזר משתמשים למדידת מרחקים והוצאת נ.צ מדויקת ברשת קואורדינטות UTM?",
-                opts: ["מד זווית פשוט", "מד קואורדינטות (מדקו')", "סרגל עץ רגיל", "מצפן שולחני"],
-                correct: 1,
-                exp: "מד קואורדינטות (מדקו') משמש למדידת מרחקים מדויקים והוצאת נ.צ ברשת UTM."
-            },
-            {
-                q: "מהי ההגדרה של 'אזימוט' בניווט?",
-                opts: [
-                    "המרחק המצטבר מתחילת המסלול.",
-                    "הזווית הנמדדת בכיוון השעון מנקודת הצפון ועד לקו הכיוון ליעד.",
-                    "הפרש הגבהים בין שתי נקודות נוף.",
-                    "קנה המידה היחסי של תצלום האוויר."
-                ],
-                correct: 1,
-                exp: "אזימוט הוא הזווית הנמדדת בכיוון השעון מנקודת הצפון ועד לקו הכיוון ליעד."
-            },
-            {
-                q: "מפקד צוות שגה ב-5 מעלות בלבד בקביעת האזימוט. מה תהיה סטייתו כתוצאה מכך לאחר תנועה של כ-5 קילומטרים?",
-                opts: ["כ-50 מטרים", "כ-450 עד 500 מטרים", "כ-2 קילומטרים", "הסטייה אינה משפיעה על המרחק"],
-                correct: 1,
-                exp: "כל סטייה של 1° באזימוט גורמת לסטייה של כ-17-18 מטרים לכל קילומטר. סטייה של 5° לאחר 5 ק\"מ שווה לכ-450-500 מטרים."
-            },
-            {
-                q: "מהם השיקולים המרכזיים בבחירת ציר ניווט מבצעי ברגלים?",
-                opts: [
-                    "תנועה בקו ישר בלבד ללא קשר לתוואי.",
-                    "נוחות הליכה, בטיחות, ניצול הסתרה, עוגני אימות בשטח וזמני תנועה.",
-                    "בחירת הציר הגבוה ביותר בלבד לכל אורך הדרך.",
-                    "התבססות על כבישים ראשיים בלבד."
-                ],
-                correct: 1,
-                exp: "תכנון ציר נכון משלב נוחות הליכה, בטיחות, ניצול תוואי להסתרה, נקודות אימות (עוגנים) ולוחות זמנים."
-            },
-            {
-                q: "מהו היתרון המרכזי של תצלום אוויר (תצ\"א) על פני מפה טופוגרפית?",
-                opts: [
-                    "תצ\"א מציגה תמונת מצב ריאליסטית ועדכנית ביותר של התכסית והשינויים בשטח.",
-                    "תצ\"א אינה דורשת כלל הבנה או פענוח.",
-                    "תצ\"א תמיד כוללת קווי גובה בולטים יותר ממפה.",
-                    "תצ\"א מציגה רק שטח פתוח ללא מבנים."
-                ],
-                correct: 0,
-                exp: "תצ\"א מספקת תמונת מצב ריאליסטית, מפורטת ועדכנית ביותר של התכסית, המבנים והשינויים בשטח."
-            },
-            {
-                q: "באיזה סוג תצ\"א יש להשתמש כאשר מעוניינים למדוד מרחקים מדויקים ולנווט בעזרת רשת UTM?",
-                opts: ["תצ\"א עגור", "אורטופוטו", "תצלום שיפועי ללא רשת", "תמונת פנורמה רגילה"],
-                correct: 1,
-                exp: "אורטופוטו הוא תצלום אוויר שעבר יישור הנדסי וכולל רשת קואורדינטות UTM, קנ\"מ מדויק וקווי גובה."
-            },
-            {
-                q: "מהו המאפיין הייחודי של תצלום אנכי (מבט על 90°) לעומת תצלום שיפועי?",
-                opts: [
-                    "בתצלום אנכי ניתן למדוד מרחקים בצורה מדויקת וללא שטחים מתים של גבהים.",
-                    "תצלום אנכי מראה את חזיתות הבתים והחלונות.",
-                    "תצלום שיפועי מאפשר מדידת UTM מדויקת יותר.",
-                    "תצלום אנכי מצולם תמיד בלילה."
-                ],
-                correct: 0,
-                exp: "תצלום אנכי (מבט על 90°) חופשי משטחים מתים של מבנים גבוהים ומאפשר מדידת מרחקים אופקית מדויקת."
-            },
-            {
-                q: "מה ייחודי ב'תצ\"א עגור' בהשוואה לתצ\"אות רגילות?",
-                opts: [
-                    "הוא שחור-לבן בלבד.",
-                    "הוא צבעוני ומצולם ממספר זוויות היקפיות המאפשרות הסתכלות ברב-ממדיות.",
-                    "הוא משמש רק לניווט ימי.",
-                    "הוא תצלום לוויין ללא פירוט מבנים."
-                ],
-                correct: 1,
-                exp: "תצ\"א עגור הינו צבעוני ומצולם ממספר זוויות היקפיות כדי לספק הסתכלות ברב-ממדיות ועומק."
-            },
-            {
-                q: "כיצד מכונים תצלומים מפורטים של אזור בנוי ביהודה ושומרון וברצועת עזה?",
-                opts: [
-                    "יהודה ושומרון = \"כפ\"ש\" (כפיר שואג); עזה = \"שועל המדבר\".",
-                    "יהודה ושומרון = \"עגור\"; עזה = \"אורטופוטו\".",
-                    "יהודה ושומרון = \"שועל המדבר\"; עזה = \"כפ\"ש\".",
-                    "שניהם נקראים \"מפת סימוני שבילים\"."
-                ],
-                correct: 0,
-                exp: "כינויים מבצעיים: תצ\"א אזור בנוי ביהודה ושומרון נקרא 'כפ\"ש', וברצועת עזה נקרא 'שועל המדבר'."
-            },
-            {
-                q: "בעת פענוח תצ\"א, כיצד מועיל ניתוח 'צורה' של מבנה?",
-                opts: [
-                    "הוא מאפשר להבחין בין מבנה מגורים למבנה ציבורי/תעשייתי לפי הסימטריה ומתווה הצורה.",
-                    "הוא קובע את עונת השנה בה צולם התצלום.",
-                    "הוא מורה על מהירות הרוח באזור.",
-                    "הוא מספק את קואורדינאטת ה-UTM של הבית."
-                ],
-                correct: 0,
-                exp: "מתווה הצורה והסימטריה מאפשרים להבדיל בין מבנה מגורים רגיל לבין מבנה ציבורי/תעשייתי גדול."
-            },
-            {
-                q: "מהי החשיבות של הבחנה בין 'צל מוטל' לבין 'צל מוכל' בפענוח מבנים?",
-                opts: [
-                    "צל מוטל נופל מחוץ למבנה ומסייע בחישוב גובהו; צל מוכל פנימי מעיד על חללים ופתחים.",
-                    "צל מוכל קובע את צבע הגג, וצל מוטל קובע את המרחק.",
-                    "צל מוטל מופיע רק בלילה, וצל מוכל ביום.",
-                    "אין הבדל – אלו שני שמות לאותו הצל."
-                ],
-                correct: 0,
-                exp: "צל מוטל חיצוני משמש כסרגל לחישוב גובה הבניין, בעוד צל מוכל פנימי מצביע על עומק חללים, חלונות ופתחים."
-            },
-            {
-                q: "מה מביע שינוי בגוון הקרקע (כהה מול בהיר) בתצלום אוויר?",
-                opts: [
-                    "שינויים ברטיבות הקרקע, צמחייה, עונות שנה או שחיקת מעבר.",
-                    "סוג המצלמה בלבד.",
-                    "גובה הים היחסי.",
-                    "זווית האזימוט של המצפן."
-                ],
-                correct: 0,
-                exp: "שינויי גוון נובעים מרטיבות קרקע, עונות שנה, צמחייה או שחיקת קרקע עקב תנועה."
-            },
-            {
-                q: "המפענח מזהה נתיב צר ובהיר מאוד בשדה פתוח המוביל לכפר. מהו ממצא זה?",
-                opts: ["קוליס (עקבות רכב)", "מרעול (שביל הליכה רגלי משחוק)", "אפיק נחל זורם", "קו מתח גבוה"],
-                correct: 1,
-                exp: "מרעול הינו שביל הליכה רגלי בעל גוון בהיר עקב שחיקת הקרקע. קוליס הינו עקבות צמיגי רכב."
-            },
-            {
-                q: "בתצ\"א ללא קנ\"מ מפורש, אורך רכב חונה המוערך ב-5 מטרים נכנס 6 פעמים באורך מבנה. מהו אורך המבנה המוערך?",
-                opts: ["כ-15 מטרים", "כ-30 מטרים", "כ-60 מטרים", "כ-100 מטרים"],
-                correct: 1,
-                exp: "נוסחת קנ\"מ יחסי: 6 מכוניות X כ-5 מטרים לרכב = כ-30 מטרים אורך מבנה."
-            },
-            {
-                q: "מהם ההבדלים הטקטיים הבולטים בין לחימה בקסבה לבין לחימה בכפר?",
-                opts: [
-                    "בקסבה הצפיפות רבה והמעבר דרך גגות צמודים קל, בעוד בכפר יש חצרות רחבות וסיכון נת\"ב.",
-                    "בכפר המבנים גבוהים יותר מבעיר.",
-                    "בקסבה אין סמטאות כלל.",
-                    "בכפר אין צירי גישה לרכב."
-                ],
-                correct: 0,
-                exp: "בקסבה הצפיפות רבה והמעבר בין גגות צמודים קל; בכפר יש חצרות רחבות וסיכון נת\"ב (כלבים נובחים)."
-            },
-            {
-                q: "אילו מהבאים מצביעים על כך שגג מבנה בתצ\"א הינו 'גג פעיל' המהווה מכלול איום?",
-                opts: [
-                    "כביסה תלויה, חדר ארעי בנוי, אנטנות ודודי שמש.",
-                    "גג ריק לחלוטין מכוסה אבק.",
-                    "רעפים אדומים חדשים ללא פתח.",
-                    "צל מוטל ארוך בלבד."
-                ],
-                correct: 0,
-                exp: "כביסה תלויה, חדר ארעי, אנטנות וציוד פעיל מצביעים על גג פעיל המהווה מרחב איום ושליטה."
-            },
-            {
-                q: "מהן המסקנות המבצעיות בעת זיהוי 'בית בבנייה' בתצ\"א?",
-                opts: [
-                    "המבנה מציב יותר פתחים מאיימים ושטחים מתים, אך אין בו חיכוך עם אזרחים.",
-                    "המבנה בטוח לחלוטין ואין בו כל איום.",
-                    "המבנה תמיד משמש כמפקדה ראשית.",
-                    "מומלץ להימנע מלהתקרב אליו עקב סכנת קריסה בלבד."
-                ],
-                correct: 0,
-                exp: "בית בבנייה מציב פתחים מרובים ושטחים מתים, אך יתרונו הטקטי הוא היעדר חיכוך עם אוכלוסייה אזרחית."
-            },
-            {
-                q: "אילו סימנים בתצ\"א מסייעים לזהות את כיוון הכניסה הראשי למבנה מגורים?",
-                opts: [
-                    "ציר/שביל גישה מגיע, רכב חונה בצמוד, וזיהוי גרם מדרגות חיצוני.",
-                    "מיקום קולטי השמש בלבד.",
-                    "כיוון הצל המוטל בצהריים.",
-                    "צבע הגג בלבד."
-                ],
-                correct: 0,
-                exp: "כיוון הכניסה הראשי מזוהה ע\"י ציר/שביל גישה מגיע, רכב חונה בצמוד, או גרם מדרגות חיצוני."
-            }
-        ];
-
-        let currentGamePin = "";
-        let players = []; // { id, name, score, currentAnswer, answerTime }
-        let currentQIndex = 0;
-        let timerInterval = null;
-        let timeLeft = 30;
-        let isHost = false;
-        let myPlayerId = "";
-        let broadcastChannel = null;
-
-        // Initialize Cross-Tab Sync via BroadcastChannel
-        function initBroadcast() {
-            broadcastChannel = new BroadcastChannel("nav_quiz_game");
-            broadcastChannel.onmessage = (event) => {
-                const data = event.data;
-                if (!data) return;
-
-                if (isHost) {
-                    handleHostMessage(data);
-                } else {
-                    handlePlayerMessage(data);
-                }
-            };
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow-x: hidden;
+            position: relative;
         }
 
-        initBroadcast();
-
-        function startHostMode() {
-            isHost = true;
-            currentGamePin = Math.floor(100000 + Math.random() * 900000).toString();
-            
-            document.getElementById("modeSelectView").classList.add("hidden");
-            document.getElementById("hostLobbyView").classList.remove("hidden");
-            document.getElementById("sessionBadge").classList.remove("hidden");
-            document.getElementById("gamePinDisplay").innerText = currentGamePin;
-            document.getElementById("lobbyPinDisplay").innerText = currentGamePin;
-
-            // Generate QR Code
-            const currentUrl = window.location.href.split('?')[0] + "?pin=" + currentGamePin;
-            new QRCode(document.getElementById("qrcode"), {
-                text: currentUrl,
-                width: 160,
-                height: 160,
-                colorDark: "#0f172a",
-                colorLight: "#ffffff"
-            });
+        /* Topo Map Background Pattern */
+        #topo-bg {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            z-index: -1;
+            opacity: 0.15;
+            pointer-events: none;
         }
 
-        function handleHostMessage(data) {
-            if (data.type === "PLAYER_JOIN") {
-                if (data.pin === currentGamePin) {
-                    if (!players.find(p => p.id === data.player.id)) {
-                        players.push({
-                            id: data.player.id,
-                            name: data.player.name,
-                            score: 0,
-                            currentAnswer: null,
-                            answerTime: 0
-                        });
-                        updateLobbyUI();
-                    }
-                }
-            } else if (data.type === "SUBMIT_ANSWER") {
-                const player = players.find(p => p.id === data.playerId);
-                if (player && player.currentAnswer === null) {
-                    player.currentAnswer = data.answerIndex;
-                    player.answerTime = data.timeTaken;
-                    updateAnsweredCount();
-                }
-            }
+        .screen {
+            display: none;
+            width: 90%;
+            max-width: 1000px;
+            background: var(--panel-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 0 30px rgba(0, 255, 102, 0.1);
+            backdrop-filter: blur(8px);
+            text-align: center;
+            animation: fadeIn 0.4s ease-out;
         }
 
-        function updateLobbyUI() {
-            document.getElementById("playerCount").innerText = players.length;
-            const list = document.getElementById("lobbyPlayersList");
-            list.innerHTML = players.map(p => `
-                <span class="px-3 py-1.5 bg-indigo-950 border border-indigo-500/30 text-indigo-200 rounded-lg text-sm font-bold flex items-center gap-2 animate-pulse">
-                    <i class="fa-solid fa-user text-xs text-indigo-400"></i> ${p.name}
-                </span>
-            `).join('');
+        .screen.active { display: block; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        h1, h2, h3 { color: #fff; text-shadow: 0 0 10px rgba(0, 255, 102, 0.3); margin-bottom: 1rem; }
+        p { color: var(--text-muted); margin-bottom: 1.5rem; font-size: 1.1rem; }
+
+        /* General Buttons */
+        .btn {
+            background: linear-gradient(135deg, #1b3826, #0e2115);
+            border: 1px solid var(--accent-green);
+            color: var(--accent-green);
+            padding: 1rem 2rem;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin: 0.5rem;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
         }
 
-        function startQuiz() {
-            if (players.length === 0) {
-                alert("אנא המתן להתחברות לפחות צוער אחד לפני התחלת המשחק!");
-                return;
-            }
-            currentQIndex = 0;
-            document.getElementById("hostLobbyView").classList.add("hidden");
-            document.getElementById("hostQuestionView").classList.remove("hidden");
-            showQuestion(currentQIndex);
+        .btn:hover {
+            background: var(--accent-green);
+            color: #000;
+            box-shadow: 0 0 15px var(--accent-green);
+            transform: translateY(-2px);
         }
 
-        function showQuestion(index) {
-            const q = quizData[index];
-            document.getElementById("questionNumBadge").innerText = `שאלה ${index + 1} מתוך ${quizData.length}`;
-            document.getElementById("hostQuestionText").innerText = q.q;
-            document.getElementById("hostExplanationBox").classList.add("hidden");
-
-            // Reset player answers
-            players.forEach(p => { p.currentAnswer = null; p.answerTime = 0; });
-            updateAnsweredCount();
-
-            // Render options
-            const colors = ['bg-red-600', 'bg-blue-600', 'bg-yellow-600', 'bg-emerald-600'];
-            const icons = ['fa-square', 'fa-circle', 'fa-triangle-exclamation', 'fa-diamond'];
-            
-            const grid = document.getElementById("hostOptionsGrid");
-            grid.innerHTML = q.opts.map((opt, i) => `
-                <div id="optBox-${i}" class="${colors[i]} p-5 rounded-2xl text-white font-bold text-lg flex items-center justify-between shadow-lg opacity-90 transition">
-                    <span>${String.fromCharCode(1504 + i)}. ${opt}</span>
-                    <i class="fa-solid ${icons[i]} text-2xl opacity-40"></i>
-                </div>
-            `).join('');
-
-            // Broadcast to players
-            broadcastChannel.postMessage({
-                type: "START_QUESTION",
-                qIndex: index,
-                opts: q.opts
-            });
-
-            // Start Timer
-            timeLeft = 30;
-            document.getElementById("timerDisplay").innerText = timeLeft;
-            clearInterval(timerInterval);
-            timerInterval = setInterval(() => {
-                timeLeft--;
-                document.getElementById("timerDisplay").innerText = timeLeft;
-                if (timeLeft <= 0) {
-                    clearInterval(timerInterval);
-                    endQuestionTime();
-                }
-            }, 1000);
+        /* Mode Selection Box */
+        .mode-container {
+            display: flex;
+            gap: 2rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 2rem;
         }
 
-        function updateAnsweredCount() {
-            const answered = players.filter(p => p.currentAnswer !== null).length;
-            document.getElementById("answeredCount").innerText = `${answered} / ${players.length}`;
-            if (answered === players.length && players.length > 0) {
-                clearInterval(timerInterval);
-                endQuestionTime();
-            }
-        }
-
-        function endQuestionTime() {
-            const q = quizData[currentQIndex];
-
-            // Calculate Scores
-            players.forEach(p => {
-                if (p.currentAnswer === q.correct) {
-                    // Score formula based on speed (max 1000 pts)
-                    const speedBonus = Math.round((p.answerTime / 30) * 500);
-                    p.score += (500 + speedBonus);
-                }
-            });
-
-            // Highlight Correct Answer on Host Screen
-            q.opts.forEach((_, i) => {
-                const box = document.getElementById(`optBox-${i}`);
-                if (i === q.correct) {
-                    box.classList.add("ring-4", "ring-white", "scale-105");
-                } else {
-                    box.classList.add("opacity-30");
-                }
-            });
-
-            // Show Explanation
-            document.getElementById("hostExplanationText").innerText = q.exp;
-            document.getElementById("hostExplanationBox").classList.remove("hidden");
-
-            // Broadcast End to Players
-            broadcastChannel.postMessage({
-                type: "END_QUESTION",
-                correctIndex: q.correct,
-                scores: players.map(p => ({ id: p.id, score: p.score }))
-            });
-        }
-
-        function nextStep() {
-            // Check if leaderboard should be shown (every 5 questions or last question)
-            if ((currentQIndex + 1) % 5 === 0 || currentQIndex === quizData.length - 1) {
-                showLeaderboard();
-            } else {
-                currentQIndex++;
-                showQuestion(currentQIndex);
-            }
-        }
-
-        function showLeaderboard() {
-            document.getElementById("hostQuestionView").classList.add("hidden");
-            document.getElementById("leaderboardView").classList.remove("hidden");
-
-            // Sort Players
-            const sorted = [...players].sort((a, b) => b.score - a.score).slice(0, 5);
-            
-            const isFinal = currentQIndex === quizData.length - 1;
-            document.getElementById("leaderboardTag").innerText = isFinal ? "תוצאות סופיות!" : "טבלת מובילים זמנית";
-
-            const medals = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣'];
-            document.getElementById("leaderboardList").innerHTML = sorted.map((p, i) => `
-                <div class="flex items-center justify-between bg-slate-900 border border-slate-700 p-4 rounded-2xl">
-                    <div class="flex items-center gap-3">
-                        <span class="text-2xl">${medals[i]}</span>
-                        <span class="font-bold text-white text-lg">${p.name}</span>
-                    </div>
-                    <span class="font-mono font-black text-emerald-400 text-xl">${p.score} נק'</span>
-                </div>
-            `).join('');
-
-            if (isFinal) {
-                confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
-            }
-        }
-
-        function continueFromLeaderboard() {
-            document.getElementById("leaderboardView").classList.add("hidden");
-            if (currentQIndex < quizData.length - 1) {
-                currentQIndex++;
-                document.getElementById("hostQuestionView").classList.remove("hidden");
-                showQuestion(currentQIndex);
-            } else {
-                alert("המבחן הסתיים בהצלחה! כל הכבוד לכל הצוערים.");
-                location.reload();
-            }
-        }
-
-        function startPlayerMode() {
-            isHost = false;
-            document.getElementById("modeSelectView").classList.add("hidden");
-            document.getElementById("playerJoinView").classList.remove("hidden");
-
-            // Auto fill PIN if in URL
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.has("pin")) {
-                document.getElementById("inputPin").value = urlParams.get("pin");
-            }
-        }
-
-        function handlePlayerJoin(e) {
-            e.preventDefault();
-            const pin = document.getElementById("inputPin").value.trim();
-            const name = document.getElementById("inputName").value.trim();
-
-            myPlayerId = "p_" + Math.random().toString(36).substr(2, 9);
-            document.getElementById("playerNameTag").innerText = name;
-
-            broadcastChannel.postMessage({
-                type: "PLAYER_JOIN",
-                pin: pin,
-                player: { id: myPlayerId, name: name }
-            });
-
-            document.getElementById("playerJoinView").classList.add("hidden");
-            document.getElementById("playerWaitingView").classList.remove("hidden");
-        }
-
-        function handlePlayerMessage(data) {
-            if (data.type === "START_QUESTION") {
-                document.getElementById("playerWaitingView").classList.add("hidden");
-                document.getElementById("playerFeedbackView").classList.add("hidden");
-                document.getElementById("playerAnswerView").classList.remove("hidden");
-
-                document.getElementById("playerQIndex").innerText = `שאלה ${data.qIndex + 1}`;
-                
-                // Set Option Button Text
-                data.opts.forEach((opt, i) => {
-                    document.querySelectorAll(`.opt-text-${i}`).forEach(el => el.innerText = opt);
-                });
-
-                window.questionStartTime = Date.now();
-            } else if (data.type === "END_QUESTION") {
-                document.getElementById("playerAnswerView").classList.add("hidden");
-                document.getElementById("playerFeedbackView").classList.remove("hidden");
-
-                // Update My Score
-                const myScoreObj = data.scores.find(s => s.id === myPlayerId);
-                if (myScoreObj) {
-                    document.getElementById("playerScoreTag").innerText = `${myScoreObj.score} נקודות`;
-                }
-
-                if (window.mySelectedAnswer === data.correctIndex) {
-                    document.getElementById("feedbackIcon").innerHTML = "🎉";
-                    document.getElementById("feedbackTitle").innerText = "תשובה נכונה!";
-                    document.getElementById("feedbackTitle").className = "text-3xl font-black text-emerald-400";
-                    document.getElementById("feedbackPoints").innerText = "+ נקודות מהירות נוספו";
-                } else if (window.mySelectedAnswer !== null) {
-                    document.getElementById("feedbackIcon").innerHTML = "❌";
-                    document.getElementById("feedbackTitle").innerText = "תשובה שגויה";
-                    document.getElementById("feedbackTitle").className = "text-3xl font-black text-red-400";
-                    document.getElementById("feedbackPoints").innerText = "לא נורא, בהצלחה בשאלה הבאה!";
-                } else {
-                    document.getElementById("feedbackIcon").innerHTML = "⏰";
-                    document.getElementById("feedbackTitle").innerText = "נגמר הזמן!";
-                    document.getElementById("feedbackTitle").className = "text-3xl font-black text-yellow-400";
-                    document.getElementById("feedbackPoints").innerText = "לא נשלחה תשובה בזמן.";
-                }
-
-                window.mySelectedAnswer = null;
-            }
-        }
-
-        function submitAnswer(ansIndex) {
-            window.mySelectedAnswer = ansIndex;
-            const timeTaken = Math.max(1, Math.floor((30000 - (Date.now() - window.questionStartTime)) / 1000));
-
-            broadcastChannel.postMessage({
-                type: "SUBMIT_ANSWER",
-                playerId: myPlayerId,
-                answerIndex: ansIndex,
-                timeTaken: timeTaken
-            });
-
-            document.getElementById("playerAnswerView").classList.add("hidden");
-            document.getElementById("playerFeedbackView").classList.remove("hidden");
-            document.getElementById("feedbackIcon").innerHTML = "👍";
-            document.getElementById("feedbackTitle").innerText = "התשובה נשלחה!";
-            document.getElementById("feedbackTitle").className = "text-3xl font-black text-indigo-400";
-            document.getElementById("feedbackPoints").innerText = "ממתין לסיום הטיימר...";
-        }
-
-        function copyGameLink() {
-            const currentUrl = window.location.href.split('?')[0] + "?pin=" + currentGamePin;
-            navigator.clipboard.writeText(currentUrl).then(() => {
-                alert("הקישור הועתק בהצלחה!");
-            });
-        }
-    </script>
-</body>
-</html>
+        .mode-card {
+            background: rgba(0,0,0,0.4);
+            border: 1px
